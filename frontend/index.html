@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>NeivaPOS</title>
+    <style>
+        body {
+            font-family: Arial;
+            background: #f4f4f4;
+            text-align: center;
+        }
+
+        .container {
+            background: white;
+            padding: 20px;
+            margin: 30px auto;
+            width: 400px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+
+        input, button {
+            width: 90%;
+            padding: 10px;
+            margin: 5px;
+        }
+
+        button {
+            background: #28a745;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>NeivaPOS 💰</h1>
+
+    <h2>Login</h2>
+    <input id="username" placeholder="Usuario">
+    <input id="password" type="password" placeholder="Contraseña">
+    <button onclick="login()">Entrar</button>
+
+    <hr>
+
+    <h2>Productos</h2>
+    <ul id="products"></ul>
+
+    <h2>Venta</h2>
+    <input id="product_id" placeholder="ID producto">
+    <input id="quantity" placeholder="Cantidad">
+    <button onclick="createSale()">Vender</button>
+</div>
+
+<script>
+const API = "http://127.0.0.1:8000";
+let token = "";
+
+// LOGIN
+async function login() {
+    const username = document.getElementById("username").value;
+    const password = document.getElementById("password").value;
+
+    const res = await fetch(`${API}/login/`, {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({username, password})
+    });
+
+    const data = await res.json();
+    token = data.access_token;
+
+    alert("Login exitoso 🔐");
+    loadProducts();
+}
+
+// Cargar productos
+async function loadProducts() {
+    const res = await fetch(`${API}/products/`);
+    const data = await res.json();
+
+    const list = document.getElementById("products");
+    list.innerHTML = "";
+
+    data.forEach(p => {
+        const li = document.createElement("li");
+        li.innerText = `${p.id} - ${p.name} - $${p.price}`;
+        list.appendChild(li);
+    });
+}
+
+// Crear venta (con token)
+async function createSale() {
+    const product_id = document.getElementById("product_id").value;
+    const quantity = document.getElementById("quantity").value;
+
+    const res = await fetch(`${API}/sales/`, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "Authorization": "Bearer " + token
+        },
+        body: JSON.stringify({
+            product_id: parseInt(product_id),
+            quantity: parseInt(quantity)
+        })
+    });
+
+    const data = await res.json();
+    alert(JSON.stringify(data));
+
+    loadProducts();
+}
+</script>
+
+</body>
+</html>
