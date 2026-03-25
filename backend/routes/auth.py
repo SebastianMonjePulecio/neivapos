@@ -1,10 +1,11 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
+from fastapi.security import OAuth2PasswordRequestForm
 
 from backend.database import get_db
-from backend import models, schemas
-
+from backend import models
 from backend.schemas.user import UserCreate, UserLogin
+
 from backend.security import (
     hash_password,
     verify_password,
@@ -17,6 +18,7 @@ router = APIRouter()
 # ======================
 # REGISTER
 # ======================
+
 @router.post("/register/")
 def register(user: UserCreate, db: Session = Depends(get_db)):
 
@@ -39,19 +41,23 @@ def register(user: UserCreate, db: Session = Depends(get_db)):
     return {"message": "Usuario creado"}
 
 # ======================
-# LOGIN
+# LOGIN (IMPORTANTE PARA SWAGGER)
 # ======================
+
 @router.post("/login/")
-def login(user: UserLogin, db: Session = Depends(get_db)):
+def login(
+    form_data: OAuth2PasswordRequestForm = Depends(),
+    db: Session = Depends(get_db)
+):
 
     db_user = db.query(models.User).filter(
-        models.User.username == user.username
+        models.User.username == form_data.username
     ).first()
 
     if not db_user:
         raise HTTPException(status_code=400, detail="Usuario no encontrado")
 
-    if not verify_password(user.password, db_user.password):
+    if not verify_password(form_data.password, db_user.password):
         raise HTTPException(status_code=400, detail="Contraseña incorrecta")
 
     token = create_access_token({"sub": db_user.username})
@@ -64,6 +70,7 @@ def login(user: UserLogin, db: Session = Depends(get_db)):
 # ======================
 # PROTECTED ROUTE
 # ======================
+
 @router.get("/usuarios/")
 def usuarios(username: str = Depends(get_current_user)):
     return {"message": f"Hola {username}"}
