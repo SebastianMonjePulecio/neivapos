@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 from backend.schemas.product import ProductCreate
 from backend.models.product import Product
+from backend.schemas.product import ProductCreate
 from backend.database import get_db
 
 router = APIRouter()
