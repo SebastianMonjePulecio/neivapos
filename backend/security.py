@@ -66,3 +66,23 @@ def get_current_user(token: str = Depends(oauth2_scheme)):
 
     except JWTError:
         raise credentials_exception
+    
+def get_current_admin(token: str = Depends(oauth2_scheme)):
+    from backend.database import SessionLocal
+    from backend import models
+
+    db = SessionLocal()
+
+    try:
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        username: str = payload.get("sub")
+
+        user = db.query(models.User).filter(models.User.username == username).first()
+
+        if user is None or user.role != "admin":
+            raise HTTPException(status_code=403, detail="No autorizado")
+
+        return user
+
+    except JWTError:
+        raise HTTPException(status_code=401, detail="Token inválido")

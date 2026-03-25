@@ -4,13 +4,14 @@ from fastapi.security import OAuth2PasswordRequestForm
 
 from backend.database import get_db
 from backend import models
-from backend.schemas.user import UserCreate, UserLogin
+from backend.schemas.user import UserCreate
 
 from backend.security import (
     hash_password,
     verify_password,
     create_access_token,
-    get_current_user
+    get_current_user,
+    get_current_admin
 )
 
 router = APIRouter()
@@ -18,7 +19,6 @@ router = APIRouter()
 # ======================
 # REGISTER
 # ======================
-
 @router.post("/register/")
 def register(user: UserCreate, db: Session = Depends(get_db)):
 
@@ -31,7 +31,8 @@ def register(user: UserCreate, db: Session = Depends(get_db)):
 
     new_user = models.User(
         username=user.username,
-        password=hash_password(user.password)
+        password=hash_password(user.password),
+        role=user.role  # 🔥 IMPORTANTE
     )
 
     db.add(new_user)
@@ -41,9 +42,8 @@ def register(user: UserCreate, db: Session = Depends(get_db)):
     return {"message": "Usuario creado"}
 
 # ======================
-# LOGIN (IMPORTANTE PARA SWAGGER)
+# LOGIN (Swagger compatible)
 # ======================
-
 @router.post("/login/")
 def login(
     form_data: OAuth2PasswordRequestForm = Depends(),
@@ -68,9 +68,15 @@ def login(
     }
 
 # ======================
-# PROTECTED ROUTE
+# RUTA PROTEGIDA
 # ======================
-
 @router.get("/usuarios/")
 def usuarios(username: str = Depends(get_current_user)):
     return {"message": f"Hola {username}"}
+
+# ======================
+# SOLO ADMIN
+# ======================
+@router.get("/admin/")
+def admin_route(user = Depends(get_current_admin)):
+    return {"message": f"Hola admin {user.username}"}
