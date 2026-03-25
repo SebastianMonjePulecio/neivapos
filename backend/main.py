@@ -17,3 +17,7 @@ app.include_router(auth.router)
 @app.get("/")
 def home():
     return {"mensaje": "API funcionando 🚀"}
+
+@app.get("/usuarios")
+def get_usuarios():
+    return {"mensaje": "Lista de usuarios"}
