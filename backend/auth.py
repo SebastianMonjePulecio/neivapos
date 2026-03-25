@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-from backend import schemas, models
+from backend.schemas.user import UserCreate
+from backend.models.user import User
 from backend.database import get_db
 from backend.security import (
     verify_password,
@@ -15,7 +16,7 @@ router = APIRouter()
 @router.post("/register/")
 def register(user: schemas.UserCreate, db: Session = Depends(get_db)):
     
-    db_user = db.query(models.User).filter(models.User.username == user.username).first()
+    db_user = db.query(User).filter(User.username == user.username).first()
 
     if db_user:
         raise HTTPException(status_code=400, detail="Usuario ya existe")
