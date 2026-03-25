@@ -1,14 +1,14 @@
 from fastapi import FastAPI
 from backend.database import engine, Base
 
-# 🔥 IMPORTANTE: importar modelos
-from backend.models import user  
+# 🔥 IMPORTAR MODELOS (OBLIGATORIO)
+from backend.models import User
 
 from backend.routes import products, sales, auth
 
 app = FastAPI()
 
-# 🔥 CREA TABLAS
+# 🔥 CREA TABLAS EN POSTGRES
 Base.metadata.create_all(bind=engine)
 
 app.include_router(products.router)

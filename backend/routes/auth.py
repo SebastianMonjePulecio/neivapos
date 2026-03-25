@@ -5,13 +5,11 @@ from fastapi.security import OAuth2PasswordRequestForm
 from backend.database import get_db
 from backend import models
 from backend.schemas.user import UserCreate
-
 from backend.security import (
     hash_password,
     verify_password,
     create_access_token,
-    get_current_user,
-    get_current_admin
+    get_current_user
 )
 
 router = APIRouter()
@@ -32,7 +30,7 @@ def register(user: UserCreate, db: Session = Depends(get_db)):
     new_user = models.User(
         username=user.username,
         password=hash_password(user.password),
-        role=user.role  # 🔥 IMPORTANTE
+        role=user.role  # 🔥 clave
     )
 
     db.add(new_user)
@@ -68,15 +66,8 @@ def login(
     }
 
 # ======================
-# RUTA PROTEGIDA
+# USER ROUTE
 # ======================
 @router.get("/usuarios/")
 def usuarios(username: str = Depends(get_current_user)):
     return {"message": f"Hola {username}"}
-
-# ======================
-# SOLO ADMIN
-# ======================
-@router.get("/admin/")
-def admin_route(user = Depends(get_current_admin)):
-    return {"message": f"Hola admin {user.username}"}
