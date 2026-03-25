@@ -3,8 +3,8 @@ from sqlalchemy.orm import Session
 
 from backend.database import get_db
 from backend import models, schemas
-from backend.schemas.user import UserCreate, UserLogin
 
+from backend.schemas.user import UserCreate, UserLogin
 from backend.security import (
     hash_password,
     verify_password,
@@ -15,7 +15,7 @@ from backend.security import (
 router = APIRouter()
 
 # ======================
-# 🔐 REGISTRO
+# REGISTER
 # ======================
 @router.post("/register/")
 def register(user: UserCreate, db: Session = Depends(get_db)):
@@ -38,9 +38,8 @@ def register(user: UserCreate, db: Session = Depends(get_db)):
 
     return {"message": "Usuario creado"}
 
-
 # ======================
-# 🔑 LOGIN
+# LOGIN
 # ======================
 @router.post("/login/")
 def login(user: UserLogin, db: Session = Depends(get_db)):
@@ -62,9 +61,8 @@ def login(user: UserLogin, db: Session = Depends(get_db)):
         "token_type": "bearer"
     }
 
-
 # ======================
-# 🛡️ RUTA PROTEGIDA
+# PROTECTED ROUTE
 # ======================
 @router.get("/usuarios/")
 def usuarios(username: str = Depends(get_current_user)):
